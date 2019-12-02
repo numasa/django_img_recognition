@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  django:
+    # AWS ECRからimageを取得
+    image: {your_account_id}.dkr.ecr.ap-northeast-1.amazonaws.com/django_img_recognition:latest
+    container_name: docker-django
+    # サービス起動後に入力されるコマンドを設定
+    command: uwsgi --http 0.0.0.0:8001 --module django_img_recognition.wsgi --py-autoreload 1 --logto /tmp/django.log
+    # 開放するポートを指定
+    ports:
+      - "8001:8001"
+    # 環境変数を指定
+    environment:
+      - DEBUG=1
+    # ローカルのAWS認証情報をコピー
+    volumes:
+      - $HOME/.aws:/home/app/.aws
+  
+  nginx:
+    # AWS ECRからimageを取得
+    image: {your_account_id}.dkr.ecr.ap-northeast-1.amazonaws.com/nginx_dev:latest
+    container_name: docker-nginx
+    # 開放するポートを指定
+    ports:
+      - "80:80"

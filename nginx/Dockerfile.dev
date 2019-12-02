@@ -1,0 +1,7 @@
+# nginx:latestイメージをpull
+FROM nginx:latest
+
+# ホストのカレントディレクトリ（現在はappディレクトリ）を作業ディレクトリにコピー
+COPY ./conf/default_dev.conf /etc/nginx/conf.d/default.conf
+COPY ./uwsgi_params /etc/nginx/uwsgi_params
+COPY ./static /static

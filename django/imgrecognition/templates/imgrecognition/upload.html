@@ -1,0 +1,46 @@
+{% extends "imgrecognition/base.html" %}
+
+{% load static %}
+
+{% block title %}画像判定テスト{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="card mx-auto">
+    <div class="card-header">
+      アップロードした画像の対象物体やシーンを特定します
+    </div><!-- ./card-header -->
+    <img class="card-img-top" src="{% if display %}{{ display }}{% else %}{% static 'imgrecognition/img/noimage.gif' %}{% endif %}" alt="画像がみつかりません">
+    <div class="card-body">
+      <form method="POST" enctype="multipart/form-data">
+        <div class="row">
+          <div class="col text-center">
+            {% csrf_token %}
+            {{ form }}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col text-center">
+            <button type="submit" class="btn btn-primary">アップロード</button>
+          </div>
+        </div>
+      </form>
+    </div><!-- ./card-body -->
+    <div class="card-footer">
+      {% if result %}
+        <h3 class="text-center">Result</h3>
+        <table class="table table-striped table-bordered table-sm">
+          <thead>
+            <tr><th scope="col">Name</th><th scope="col">名前</th><th scope="col">Confidence</th></tr>
+          </thead>
+          <tbody>
+            {% for row in result %}
+              <tr><td>{{ row.0 }}</td><td>{{ row.1 }}</td><td>{{ row.2 }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% endif %}
+    </div><!-- ./card-footer -->
+  </div><!-- ./card -->
+</div><!-- ./row -->
+{% endblock %}

@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  django:
+    # AWS ECRからimageを取得
+    image: {your_account_id}.dkr.ecr.ap-northeast-1.amazonaws.com/django_img_recognition:latest
+    # サービス起動後に入力されるコマンドを設定
+    command: uwsgi --http 0.0.0.0:8001 --module django_img_recognition.wsgi --py-autoreload 1 --logto /tmp/django.log
+    # 開放するポートを指定
+    ports:
+      - "8001:8001"
+    # 環境変数を指定
+    environment:
+      - DEBUG=1
+    # CloudWatch Logs設定
+    logging:
+      driver: awslogs
+      options: 
+        awslogs-group: fargate-django
+        awslogs-region: ap-northeast-1
+        awslogs-stream-prefix: fargate-django
+  
+  nginx:
+    # AWS ECRからimageを取得
+    image: {your_account_id}.dkr.ecr.ap-northeast-1.amazonaws.com/nginx_prod:latest
+    # 開放するポートを指定
+    ports:
+      - "80:80"
+    # CloudWatch Logs設定
+    logging:
+      driver: awslogs
+      options: 
+        awslogs-group: fargate-nginx
+        awslogs-region: ap-northeast-1
+        awslogs-stream-prefix: fargate-nginx
