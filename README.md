@@ -3,8 +3,7 @@
 ## Description
 Amazon Rekognitionを利用した画像認識が可能なPython/Django製のWebアプリケーション
 
-## Getting Started
-### Requirement
+## Requirement
 * python 3.7
 * pip
 * pipenv
@@ -13,7 +12,9 @@ Amazon Rekognitionを利用した画像認識が可能なPython/Django製のWeb�
 * awscli (AWS CLI)
 * ecs-cli (Amazon ECS CLI)
 
-### Install (Local環境)
+## Install
+### Local
+---
 #### git clone
 ```bash
 $ git clone https://github.com/numasa/django_img_recognition.git
@@ -23,11 +24,22 @@ $ cd django_img_recognition/django
 ```bash
 $ pipenv install
 ```
+#### runserver
+```bash
+$ pipenv run python manage.py runserver
+```
+### ローカルDocker
+---
+#### ローカルDockerからECRログイン
+```bash
+$ aws ecr get-login --region {your_region} --no-include-email
+```
+→出力した内容をコマンド実行してログイン
 #### ローカルDocker環境のbuild
 ```bash
+$ cd django_img_recognition/
 $ docker-compose -f docker-compose.dev.yml build
 ```
-
 #### ローカルDocker環境のup
 ```bash
 $ docker-compose -f docker-compose.dev.yml up
@@ -40,7 +52,8 @@ http://localhost/imgrecognition/upload/
 $ docker-compose -f docker-compose.dev.yml down
 ```
 
-### Install (AWS Fargate環境)
+### AWS Fargate環境
+---
 #### Fargate configure 設定
 ```bash
 $ ecs-cli configure \
