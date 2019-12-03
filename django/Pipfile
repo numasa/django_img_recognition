@@ -9,6 +9,7 @@ verify_ssl = true
 django = "*"
 boto3 = "*"
 uwsgi = "*"
+psycopg2 = "*"
 
 [requires]
 python_version = "3.7"

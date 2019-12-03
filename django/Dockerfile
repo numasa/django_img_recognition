@@ -15,7 +15,7 @@ ENV HOME /home/app
 # Pipenv/python3-dev他をインストール
 RUN pip install --upgrade pip setuptools \
 && pip install pipenv \
-&& apk --update-cache add python3-dev gcc g++ libc-dev linux-headers
+&& apk --update-cache add python3-dev gcc g++ libc-dev linux-headers postgresql-dev bash
 
 # ホストのカレントディレクトリ（現在はappディレクトリ）を作業ディレクトリにコピー
 COPY . /usr/src/app/

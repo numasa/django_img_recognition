@@ -9,52 +9,52 @@ Amazon Rekognitionを利用した画像認識が可能なPython/Django製のWeb�
 * pipenv
 * docker
 * docker-compose
+* postgreSQL 10.10
 * awscli (AWS CLI)
 * ecs-cli (Amazon ECS CLI)
 
 ## Install
-### Local
+### ① Local
 ---
-#### git clone
+#### 1. git clone
 ```bash
 $ git clone https://github.com/numasa/django_img_recognition.git
 $ cd django_img_recognition/django
 ```
-#### pipenv install
+#### 2. pipenv install
 ```bash
 $ pipenv install
 ```
-#### runserver
+#### 3. migrate & runserver
 ```bash
-$ pipenv run python manage.py runserver
+$ pipenv run python manage.py migrate --settings=django_img_recognition.settings.local
+$ pipenv run python manage.py runserver --settings=sdjango_img_recognition.settings.local
 ```
-### ローカルDocker
----
-#### ローカルDockerからECRログイン
+### ② ローカルDocker
+#### 1. ローカルDockerからECRログイン
 ```bash
 $ aws ecr get-login --region {your_region} --no-include-email
 ```
 →出力した内容をコマンド実行してログイン
-#### ローカルDocker環境のbuild
+#### 2. ローカルDocker環境のbuild
 ```bash
 $ cd django_img_recognition/
 $ docker-compose -f docker-compose.dev.yml build
 ```
-#### ローカルDocker環境のup
+#### 3. ローカルDocker環境のup
 ```bash
 $ docker-compose -f docker-compose.dev.yml up
 ```
-#### ローカルDocker環境のアクセスURL
+#### 4. ローカルDocker環境のアクセスURL
 http://localhost/imgrecognition/upload/
 
-#### (停止する場合)ローカルDocker環境のdown
+#### 5. (停止する場合)ローカルDocker環境のdown
 ```bash
 $ docker-compose -f docker-compose.dev.yml down
 ```
 
-### AWS Fargate環境
----
-#### Fargate configure 設定
+### ③ AWS Fargate環境
+#### 1. Fargate configure 設定
 ```bash
 $ ecs-cli configure \
 --cluster django-fargate \
@@ -64,7 +64,7 @@ $ ecs-cli configure \
 
 INFO[0000] Saved ECS CLI cluster configuration django-fargate.
 ```
-#### Fargate configure profile 設定
+#### 2. Fargate configure profile 設定
 ```bash
 $ ecs-cli configure profile \
 --access-key {access_key} \
@@ -74,7 +74,7 @@ $ ecs-cli configure profile \
 INFO[0000] Saved ECS CLI profile configuration django-fargate-profile.
 ```
 
-#### Fargate用のクラスター作成
+#### 3. Fargate用のクラスター作成
 ```bash
 $ ecs-cli up \
 --cluster-config django-fargate \
@@ -90,14 +90,15 @@ Subnet created: {your_subnet_id_2}
 Cluster creation succeeded.
 ```
 ※このタイミングでCloudFormationのstackが作成されます
-#### VPCに付与されたSecurity Group Idを確認
+#### 4. VPCに付与されたSecurity Group Idを確認
 ```bash
 $ aws ec2 describe-security-groups --filters Name=vpc-id,Values={vpc_id} --region {your_region} | grep GroupId
 
+※出力には、以下の形式でセキュリティグループのID が含まれます。
                             "GroupId": "{your_sg_id}",
             "GroupId": "{your_sg_id}",
 ```
-#### ecs-params.ymlを作成
+#### 5. ecs-params.ymlを作成
 サブネットIDとセキュリティグループIDをecs-params.ymlに記載する
 ```bash:ecs-params.yml
 version: 1
@@ -117,7 +118,7 @@ run_params:
         - "{your_sg_id}"
       assign_public_ip: ENABLED
 ```
-#### AWS ELB (Application Load Balancer)を作成
+#### 6. AWS ELB (Application Load Balancer)を作成
 ```bash
 $ aws elbv2 create-load-balancer \
 --name django-fargate-alb \
@@ -129,7 +130,7 @@ $ aws elbv2 create-load-balancer \
 arn:aws:elasticloadbalancing:region:aws_account_id:loadbalancer/app/django-fargate-alb/e5ba62739c16e642
 django-fargate-alb-XXXXXXXXXX.ap-northeast-1.elb.amazonaws.com
 ```
-#### ターゲットグループの作成
+#### 7. ターゲットグループの作成
 ```bash
 $ aws elbv2 create-target-group \
 --name django-fargate-target-group \
@@ -141,7 +142,7 @@ $ aws elbv2 create-target-group \
 
 ※出力には、以下の形式でターゲットグループの ARN が含まれます。arn:aws:elasticloadbalancing:region:aws_account_id:targetgroup/django-fargate-target-group/209a844cd01825a4
 ```
-#### ロードバランサとターゲットグループを紐付けるリスナーを作成
+#### 8. ロードバランサとターゲットグループを紐付けるリスナーを作成
 ```bash
 $ aws elbv2 create-listener \
 --load-balancer-arn {your_load_balancer_arn} \
@@ -152,7 +153,7 @@ $ aws elbv2 create-listener \
 ※出力には、以下の形式でリスナーの ARN が含まれます。
 arn:aws:elasticloadbalancing:region:aws_account_id:listener/app/bluegreen-alb/e5ba62739c16e642/665750bec1b03bd4
 ```
-#### Fargate サービスのcreate
+#### 9. Fargate サービスのcreate
 ```bash
 $ ecs-cli compose -f docker-compose.prod.yml service create \
 --target-group-arn {your_target_group_arn} \
@@ -162,7 +163,7 @@ $ ecs-cli compose -f docker-compose.prod.yml service create \
 INFO[0000] Using ECS task definition                     TaskDefinition="django_img_recognition:1"
 INFO[0001] Created an ECS service                        service=django_img_recognition taskDefinition="django_img_recognition:1"
 ```
-#### Fargate サービスのup
+#### 10. Fargate サービスのup
 ```bash
 $ ecs-cli compose -f docker-compose.prod.yml service up
 
@@ -174,7 +175,7 @@ INFO[0062] (service django_img_recognition) registered 1 targets in (target-grou
 INFO[0062] ECS Service has reached a stable state        desiredCount=1 runningCount=1 serviceName=django_img_recognition
 ```
 ※Log Groupが存在する場合はWARNが出力するが影響なし
-#### Security Groupの80番ポートへのTCPアクセスを許可
+#### 11. Security Groupの80番ポートへのTCPアクセスを許可
 ```bash
 $ aws ec2 authorize-security-group-ingress \
 --group-id {your_sg_id} \
@@ -183,14 +184,14 @@ $ aws ec2 authorize-security-group-ingress \
 --cidr 0.0.0.0/0 \
 --region {your_region}
 ```
-#### FargateDocker環境のアクセスURL
+#### 12. FargateDocker環境のアクセスURL
 http://{ロードバランサのアクセス先ドメイン}/imgrecognition/upload/
 
-#### Fargate停止
+#### 13. Fargate停止
 ```bash
 $ ecs-cli compose -f docker-compose.prod.yml service down
 ```
-#### Fargate用のクラスター削除
+#### 14. Fargate用のクラスター削除
 ```bash
 $ ecs-cli down --force \
 --cluster-config django-fargate \
