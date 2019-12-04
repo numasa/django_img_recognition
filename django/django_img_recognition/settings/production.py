@@ -10,7 +10,7 @@ DATABASES = {
         'NAME': 'imgrecognition',
         'USER': 'django',
         'PASSWORD': 'django',
-        'HOST': 'aaa',
+        'HOST': 'localhost',
         'PORT': '',
     }
 }

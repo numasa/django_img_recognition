@@ -1,17 +1,40 @@
 version: '3'
 
 services:
+  postgresql:
+    # DockerHUBからimageを取得
+    image: postgres:10.10
+    # 開放するポートを指定
+    ports:
+      - "5432:5432"
+    # PostgreSQLのユーザ/パスワード/データベースを作成
+    environment:
+      POSTGRES_USER: django
+      POSTGRES_PASSWORD: django
+      POSTGRES_DB: imgrecognition
+      TZ: "Asia/Tokyo"
+    # CloudWatch Logs設定
+    logging:
+      driver: awslogs
+      options: 
+        awslogs-group: fargate-postgresql
+        awslogs-region: ap-northeast-1
+        awslogs-stream-prefix: fargate-postgresql
+
   django:
     # AWS ECRからimageを取得
-    image: {your_account_id}.dkr.ecr.ap-northeast-1.amazonaws.com/django_img_recognition:latest
+    image: ${{ secrets.CONTAINER_REGISTRY_PATH }}/django_img_recognition:latest
     # サービス起動後に入力されるコマンドを設定
-    command: uwsgi --http 0.0.0.0:8001 --module django_img_recognition.wsgi --py-autoreload 1 --logto /tmp/django.log
+    command: >
+      ash -c "./wait-for-it.sh localhost:5432 --timeout=100 -- ./migrateProduction.sh &&
+      uwsgi --http 0.0.0.0:8001 --module django_img_recognition.wsgi --py-autoreload 1"
     # 開放するポートを指定
     ports:
       - "8001:8001"
     # 環境変数を指定
     environment:
-      - DEBUG=1
+      DEBUG: 1
+      TZ: "Asia/Tokyo"
     # CloudWatch Logs設定
     logging:
       driver: awslogs
@@ -22,14 +45,16 @@ services:
   
   nginx:
     # AWS ECRからimageを取得
-    image: {your_account_id}.dkr.ecr.ap-northeast-1.amazonaws.com/nginx_prod:latest
+    image: ${{ secrets.CONTAINER_REGISTRY_PATH }}/nginx_prod:latest
     # 開放するポートを指定
     ports:
       - "80:80"
+    environment:
+      TZ: "Asia/Tokyo"
     # CloudWatch Logs設定
     logging:
       driver: awslogs
-      options: 
+      options:
         awslogs-group: fargate-nginx
         awslogs-region: ap-northeast-1
         awslogs-stream-prefix: fargate-nginx
