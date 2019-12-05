@@ -137,6 +137,7 @@ $ aws elbv2 create-target-group \
 --protocol HTTP \
 --port 80 \
 --target-type ip \
+--health-check-path /imgrecognition/upload/ \
 --vpc-id {your_vpc_id} \
 --region {your_region}
 
@@ -165,7 +166,7 @@ INFO[0001] Created an ECS service                        service=django_img_reco
 ```
 #### 10. Fargate サービスのup
 ```bash
-$ ecs-cli compose -f docker-compose.prod.yml service up
+$ ecs-cli compose -f docker-compose.prod.yml service up --create-log-groups
 
 INFO[0001] Using ECS task definition                     TaskDefinition="django_img_recognition:1"
 INFO[0001] Updated ECS service successfully              desiredCount=1 force-deployment=false service=django_img_recognition
@@ -187,7 +188,7 @@ $ aws ec2 authorize-security-group-ingress \
 #### 12. FargateDocker環境のアクセスURL
 http://{ロードバランサのアクセス先ドメイン}/imgrecognition/upload/
 
-#### 13. Fargate停止
+#### 13. Fargate サービスのdown
 ```bash
 $ ecs-cli compose -f docker-compose.prod.yml service down
 ```
