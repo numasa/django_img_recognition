@@ -20,8 +20,8 @@ phases:
       - echo Pushing the Docker image...
       - docker push $REPOSITORY_URI:latest
       - echo Writing image definitions file...
-      - printf '[{"name":"container_name","imageUri":"%s"}]' $REPOSITORY_URI:latest > imagedefinitions.json
+      - printf '[{"name":"django","imageUri":"%s"}]' $REPOSITORY_URI:latest > imageDetail.json
 
 artifacts:
   ## buildの最後で作成したファイルをアーティファクトとして流す
-  files: imagedefinitions.json
+  files: imageDetail.json
