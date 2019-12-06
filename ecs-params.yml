@@ -5,6 +5,11 @@ task_definition:
   task_size:
     mem_limit: 0.5GB
     cpu_limit: 256
+  services:
+    django:
+      secrets:
+        - value_from: django-fargate-db-endpoint
+          name: DB_ENDPOINT
 run_params:
   network_configuration:
     awsvpc_configuration:

@@ -11,7 +11,7 @@ DATABASES = {
         'NAME': 'imgrecognition',
         'USER': 'root',
         'PASSWORD': 'password',
-        'HOST': ${{ secrets.RDS_ENDPOINT }},
+        'HOST': os.environ['DB_ENDPOINT'],
         'PORT': '',
     }
 }
