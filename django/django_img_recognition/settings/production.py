@@ -9,8 +9,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'imgrecognition',
-        'USER': 'django',
-        'PASSWORD': 'django',
+        'USER': 'root',
+        'PASSWORD': 'password',
         'HOST': os.environ['DB_ENDPOINT'],
         'PORT': '',
     }
