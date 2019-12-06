@@ -1,4 +1,5 @@
 from .base import *
+import os
 
 DEBUG = False
 
@@ -10,7 +11,7 @@ DATABASES = {
         'NAME': 'imgrecognition',
         'USER': 'django',
         'PASSWORD': 'django',
-        'HOST': 'localhost',
+        'HOST': os.environ['DB_ENDPOINT'],
         'PORT': '',
     }
 }
