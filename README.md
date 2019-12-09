@@ -158,7 +158,7 @@ arn:aws:elasticloadbalancing:region:aws_account_id:listener/app/bluegreen-alb/e5
 * ecs-params.yml
 * docker-compose.prod.yml
 </br>
-.envを以下の内容で作成
+.envを以下の内容で作成</br>
 ```bash
 # ロードバランサーDNS
 LOADBALANCER_DNS="XXXXX.region.elb.amazonaws.com"
@@ -172,7 +172,7 @@ SECURITY_GROUP_ID="sg-XXXXXXXXXXXXXXXXX"
 # AWS RDS エンドポイント パス
 RDS_ENDPOINT="XXXXXX.region.rds.amazonaws.com"
 ```
-作成後に
+作成後に</br>
 ```bash
 $ export $(cat .env | grep -v ^# | xargs)
 ```
@@ -196,7 +196,7 @@ INFO[0001] Created an ECS service                        service=django_img_reco
 ```bash
 $ ecs-cli compose -f docker-compose.prod.yml service scale 1
 ```
-※「scale N」には実行するタスク数を設定してください
+※「scale N」には実行するタスク数を設定してください</br>
 出力:
 ```bash
 INFO[0001] Using ECS task definition                     TaskDefinition="django_img_recognition:1"
