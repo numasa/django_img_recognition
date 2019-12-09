@@ -4,6 +4,9 @@ from django.shortcuts import redirect
 from imgrecognition.forms import ImageUploadForm
 from imgrecognition.views.rekognition import rekognition
 
+import logging
+logger=logging.getLogger(__name__)
+
 def upload(request):
     '''
     画像アップロード

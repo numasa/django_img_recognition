@@ -32,22 +32,35 @@ $ pipenv run python manage.py runserver --settings=sdjango_img_recognition.setti
 ### ② ローカルDocker
 #### 1. ローカルDockerからECRログイン
 ```bash
+$ cd django_img_recognition/
 $ $(aws ecr get-login --region {your_region} --no-include-email)
 ```
-→出力した内容をコマンド実行してログイン
-#### 2. ローカルDocker環境のbuild
+#### 2. 環境変数の情報を設定する
+以下のファイルで利用するために、「.env」ファイルに環境変数を設定します。
+* docker-compose.dev.yml
+</br>
+.envを以下の内容で作成
 ```bash
-$ cd django_img_recognition/
+# AWS ECR パス
+CONTAINER_REGISTRY_PATH="123456789012.dkr.ecr.region.amazonaws.com"
+```
+作成後に
+```bash
+$ export $(cat .env | grep -v ^# | xargs)
+```
+
+#### 3. ローカルDocker環境のbuild
+```bash
 $ docker-compose -f docker-compose.dev.yml build
 ```
-#### 3. ローカルDocker環境のup
+#### 4. ローカルDocker環境のup
 ```bash
 $ docker-compose -f docker-compose.dev.yml up
 ```
-#### 4. ローカルDocker環境のアクセスURL
+#### 5. ローカルDocker環境のアクセスURL
 http://localhost/imgrecognition/upload/
 
-#### 5. (停止する場合)ローカルDocker環境のdown
+#### 6. (停止する場合)ローカルDocker環境のdown
 ```bash
 $ docker-compose -f docker-compose.dev.yml down
 ```
@@ -71,7 +84,9 @@ $ ecs-cli configure profile \
 --access-key {access_key} \
 --secret-key {secret_key} \
 --profile-name django-fargate-profile
-
+```
+出力:
+```
 INFO[0000] Saved ECS CLI profile configuration django-fargate-profile.
 ```
 
@@ -95,39 +110,7 @@ Subnet created: {your_subnet_id_2}
 Cluster creation succeeded.
 ```
 ※このタイミングでCloudFormationのstackが作成されます
-#### 4. VPCに付与されたSecurity Group Idを確認
-```bash
-$ aws ec2 describe-security-groups --filters Name=vpc-id,Values={vpc_id} --region {your_region} | grep GroupId
-```
-
-出力：</br>
-※出力には、以下の形式でセキュリティグループのID が含まれます。
-```bash
-                            "GroupId": "{your_sg_id}",
-            "GroupId": "{your_sg_id}",
-```
-#### 5. ecs-params.ymlを作成
-サブネットIDとセキュリティグループIDをecs-params.ymlに記載する</br>
-ecs-params.yml
-```bash:
-version: 1
-task_definition:
-  task_execution_role: ecsTaskExecutionRole
-  ecs_network_mode: awsvpc
-  task_size:
-    mem_limit: 0.5GB
-    cpu_limit: 256
-run_params:
-  network_configuration:
-    awsvpc_configuration:
-      subnets:
-        - "{your_subnet_id_1}"
-        - "{your_subnet_id_2}"
-      security_groups:
-        - "{your_sg_id}"
-      assign_public_ip: ENABLED
-```
-#### 6. AWS ELB (Application Load Balancer)を作成
+#### 4. AWS ELB (Application Load Balancer)を作成
 ```bash
 $ aws elbv2 create-load-balancer \
 --name django-fargate-alb \
@@ -141,7 +124,7 @@ $ aws elbv2 create-load-balancer \
 arn:aws:elasticloadbalancing:region:aws_account_id:loadbalancer/app/django-fargate-alb/e5ba62739c16e642
 django-fargate-alb-XXXXXXXXXX.ap-northeast-1.elb.amazonaws.com
 ```
-#### 7. ターゲットグループの作成
+#### 5. ターゲットグループの作成
 ```bash
 $ aws elbv2 create-target-group \
 --name django-fargate-target-group \
@@ -157,7 +140,7 @@ $ aws elbv2 create-target-group \
 ```bash
 arn:aws:elasticloadbalancing:region:aws_account_id:targetgroup/django-fargate-target-group/209a844cd01825a4
 ```
-#### 8. ロードバランサとターゲットグループを紐付けるリスナーを作成
+#### 6. ロードバランサとターゲットグループを紐付けるリスナーを作成
 ```bash
 $ aws elbv2 create-listener \
 --load-balancer-arn {your_load_balancer_arn} \
@@ -170,22 +153,50 @@ $ aws elbv2 create-listener \
 ```bash
 arn:aws:elasticloadbalancing:region:aws_account_id:listener/app/bluegreen-alb/e5ba62739c16e642/665750bec1b03bd4
 ```
-#### 9. Fargate サービスのcreate
+#### 7. 環境変数の情報を設定する
+以下のファイルで利用するために、「.env」ファイルに環境変数を設定します。
+* ecs-params.yml
+* docker-compose.prod.yml
+</br>
+.envを以下の内容で作成
+```bash
+# ロードバランサーDNS
+LOADBALANCER_DNS="XXXXX.region.elb.amazonaws.com"
+# AWS ECR パス
+CONTAINER_REGISTRY_PATH="123456789012.dkr.ecr.region.amazonaws.com"
+# AWS VPC Subnet ID
+SUBNET_ID_1="subnet-XXXXXXXXXXXXXXXXX"
+SUBNET_ID_2="subnet-XXXXXXXXXXXXXXXXX"
+# AWS Security Group ID
+SECURITY_GROUP_ID="sg-XXXXXXXXXXXXXXXXX"
+# AWS RDS エンドポイント パス
+RDS_ENDPOINT="XXXXXX.region.rds.amazonaws.com"
+```
+作成後に
+```bash
+$ export $(cat .env | grep -v ^# | xargs)
+```
+インスタンスで利用するRDSエンドポイントを設定するために、AWS System Manager > パラメータストア で</br>
+「django-fargate-db-endpoint」というパラメータを作成します。
+
+#### 8. Fargate サービスのcreate
 ```bash
 $ ecs-cli compose -f docker-compose.prod.yml service create \
 --target-group-arn {your_target_group_arn} \
 --container-name nginx \
---container-port 80
+--container-port 80 \
+--create-log-groups
 ```
 出力:
 ```bash
 INFO[0000] Using ECS task definition                     TaskDefinition="django_img_recognition:1"
 INFO[0001] Created an ECS service                        service=django_img_recognition taskDefinition="django_img_recognition:1"
 ```
-#### 10. Fargate サービスのup
+#### 9. Fargate サービスの起動
 ```bash
-$ ecs-cli compose -f docker-compose.prod.yml service up --create-log-groups
+$ ecs-cli compose -f docker-compose.prod.yml service scale 1
 ```
+※「scale N」には実行するタスク数を設定してください
 出力:
 ```bash
 INFO[0001] Using ECS task definition                     TaskDefinition="django_img_recognition:1"
@@ -196,7 +207,7 @@ INFO[0062] (service django_img_recognition) registered 1 targets in (target-grou
 INFO[0062] ECS Service has reached a stable state        desiredCount=1 runningCount=1 serviceName=django_img_recognition
 ```
 ※Log Groupが存在する場合はWARNが出力するが影響ありません
-#### 11. Security Groupの80番ポートへのTCPアクセスを許可
+#### 10. Security Groupの80番ポートへのTCPアクセスを許可
 ```bash
 $ aws ec2 authorize-security-group-ingress \
 --group-id {your_sg_id} \
@@ -205,24 +216,13 @@ $ aws ec2 authorize-security-group-ingress \
 --cidr 0.0.0.0/0 \
 --region {your_region}
 ```
-#### 12. FargateDocker環境のアクセスURL
+#### 11. FargateDocker環境のアクセスURL
 http://{ロードバランサのアクセス先ドメイン}/imgrecognition/upload/
 
-#### 13. Fargate サービスのdown
+#### 12. (停止する場合)Fargate サービスのdown
 ```bash
 $ ecs-cli compose -f docker-compose.prod.yml service down
 ```
-#### 14. Fargate用のクラスター削除
-```bash
-$ ecs-cli down --force \
---cluster-config django-fargate \
---ecs-profile django-fargate-profile
-```
-出力:
-```
-INFO[0001] Waiting for your cluster resources to be deleted... 
-INFO[0002] Cloudformation stack status                   stackStatus=DELETE_IN_PROGRESS
-INFO[0062] Deleted cluster                               cluster=django-fargate
-```
 ### CI/CD
-...
+#### 設定
+* 

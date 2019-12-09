@@ -128,3 +128,47 @@ STATICFILES_DIRS = [
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+#for logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters':{
+        'standard':{
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S"
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': '/tmp/debug.log',
+            'maxBytes': 500000000,
+            'backupCount':2,
+            'formatter':'standard',
+        },
+        'console':{
+            'level':'DEBUG',
+            'class':'logging.StreamHandler',
+            'formatter':'standard'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'main':{
+            'handlers':['file','console'],
+            'level':'DEBUG',
+            'propagate':True,
+        },
+        'imgrecognition':{
+            'handlers':['file','console'],
+            'level':'DEBUG',
+            'propagate':True,
+        }
+    },
+}

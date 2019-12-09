@@ -1,6 +1,9 @@
 import os
 import boto3
 
+import logging
+logger=logging.getLogger(__name__)
+
 def rekognition(filename):
     '''
     画像認識
@@ -35,6 +38,7 @@ def rekognition(filename):
                        'Bytes': source_bytes
                    }
     )
+    logger.info('rekognition response:' + str(response))
 
     # responseのName(名前)とConfidence(信頼性)のみに整形
     formatted_response = []

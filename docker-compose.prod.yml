@@ -4,10 +4,10 @@ services:
 
   django:
     # AWS ECRからimageを取得
-    image: ${{ secrets.CONTAINER_REGISTRY_PATH }}/django_img_recognition:latest
+    image: $CONTAINER_REGISTRY_PATH/django_img_recognition:latest
     # サービス起動後に入力されるコマンドを設定
     command: >
-      ash -c "./wait-for-it.sh ${{ secrets.RDS_ENDPOINT }}:5432 --timeout=100 -- ./migrateProduction.sh &&
+      ash -c "./wait-for-it.sh $RDS_ENDPOINT:5432 --timeout=100 -- ./migrateProduction.sh &&
       uwsgi --http 0.0.0.0:8001 --module django_img_recognition.wsgi --py-autoreload 1"
     # 開放するポートを指定
     ports:
@@ -26,7 +26,7 @@ services:
   
   nginx:
     # AWS ECRからimageを取得
-    image: ${{ secrets.CONTAINER_REGISTRY_PATH }}/nginx_prod:latest
+    image: $CONTAINER_REGISTRY_PATH/nginx_prod:latest
     # 開放するポートを指定
     ports:
       - "80:80"

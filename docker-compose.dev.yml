@@ -16,7 +16,7 @@ services:
 
   django:
     # AWS ECRからimageを取得
-    image: ${{ secrets.CONTAINER_REGISTRY_PATH }}/django_img_recognition:latest
+    image: $CONTAINER_REGISTRY_PATH/django_img_recognition:latest
     # サービス起動後に入力されるコマンドを設定
     command: >
       ash -c "./wait-for-it.sh postgresql:5432 --timeout=100 -- ./migrateDocker.sh &&
@@ -36,7 +36,7 @@ services:
 
   nginx:
     # AWS ECRからimageを取得
-    image: ${{ secrets.CONTAINER_REGISTRY_PATH }}/nginx_dev:latest
+    image: $CONTAINER_REGISTRY_PATH/nginx_dev:latest
     # 開放するポートを指定
     ports:
       - "80:80"
