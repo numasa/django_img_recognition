@@ -17,7 +17,7 @@ Amazon Rekognitionを利用した画像認識が可能なPython/Django製のWeb�
 ![arch.png](/arch.png)
 
 ## Service Image
-![image.png](/image.png)
+<img src="image.png" alt="Service Image" width="300">
 
 ## Install
 ### ① ローカル
