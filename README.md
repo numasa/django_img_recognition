@@ -14,10 +14,10 @@ Amazon Rekognitionを利用した画像認識が可能なPython/Django製のWeb�
 * ecs-cli (Amazon ECS CLI)
 
 ## Architecture Image
-![arch.png](/arch.png)
+![arch.png](/readme_images/arch.png)
 
 ## Service Image
-<img src="image.png" alt="Service Image" width="300">
+<img src="readme_images/image.png" alt="Service Image" width="300">
 
 ## Install
 ### ① ローカル
@@ -75,7 +75,15 @@ $ docker-compose -f docker-compose.dev.yml down
 [InstallAWSFargate.md](/InstallAWSFargate.md)を参照
 
 ### CI/CD
-CI/CDの流れ
-![CI/CD](/CICD.png)
-#### 設定
-* 
+AWS CodepipelineでCI/CDの流れを実現
+#### CI/CDの流れ
+![CI/CD](/readme_images/CICD.png)
+
+#### Source
+![source.png](/readme_images/source.png)
+
+#### Build
+![build.png](/readme_images/build.png)
+
+#### Deploy
+![deploy.png](/readme_images/deploy.png)
