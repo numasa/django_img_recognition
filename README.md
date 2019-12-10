@@ -46,6 +46,7 @@ $ $(aws ecr get-login --region {your_region} --no-include-email)
 * docker-compose.dev.yml
 </br>
 .envを以下の内容で作成
+
 ```bash
 # AWS ECR パス
 CONTAINER_REGISTRY_PATH="123456789012.dkr.ecr.region.amazonaws.com"
@@ -84,6 +85,9 @@ AWS CodepipelineでCI/CDの流れを実現
 
 #### Build
 ![build.png](/readme_images/build.png)
+
+#### Test
+In Progress ...
 
 #### Deploy
 ![deploy.png](/readme_images/deploy.png)
